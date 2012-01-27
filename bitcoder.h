@@ -62,12 +62,16 @@ protected:
 class BitDecoder : public BitCoderBase
 {
 public:
+    Code fetchCode() {
+        return /*__builtin_bswap32*/(*p++);
+    }
+
     void begin(const unsigned char *ptr) {
         p = (Code *) ptr;
 #if defined(USE_MMX)
-        bitcache = _mm_cvtsi32_si64(*p++);
+        bitcache = _mm_cvtsi32_si64(fetchCode());
 #else
-        bitcache = *p++;
+        bitcache = fetchCode();
 #endif
         len = CodeBits;
     }
@@ -76,10 +80,10 @@ public:
         if (len < CodeBits) {
 #if defined(USE_MMX)
             bitcache = _mm_slli_si64(bitcache, CodeBits);
-            bitcache = _mm_or_si64(bitcache, _mm_cvtsi32_si64(*p++));
+            bitcache = _mm_or_si64(bitcache, _mm_cvtsi32_si64(fetchCode()));
 #else
             bitcache <<= CodeBits;
-            bitcache += *p++;
+            bitcache += fetchCode();
 #endif
             len += CodeBits;
         }
@@ -138,6 +142,10 @@ private:
 class BitEncoder : public BitCoderBase
 {
 public:
+    void storeCode(Code code) {
+        *p++ = /*__builtin_bswap32*/(code);
+    }
+
     void begin(unsigned char *ptr) {
         p = (Code *) ptr;
         len = 0;
@@ -152,9 +160,9 @@ public:
         if (len >= CodeBits) {
             len -= CodeBits;
 #if defined(USE_MMX)
-            *p++ = _mm_cvtsi64_si32(_mm_srli_si64(bitcache, len));
+            storeCode(_mm_cvtsi64_si32(_mm_srli_si64(bitcache, len)));
 #else
-            *p++ = bitcache >> len;
+            storeCode(bitcache >> len);
 #endif
         }
     }
@@ -172,11 +180,12 @@ public:
     void align() {
         if (len > 0) {
 #if defined(USE_MMX)
-            *p++ = _mm_cvtsi64_si32(_mm_slli_si64(bitcache, CodeBits - len));
+            storeCode(_mm_cvtsi64_si32(_mm_slli_si64(bitcache, CodeBits - len)));
             _mm_empty();
 #else
-            *p++ = bitcache << (CodeBits - len);
+            storeCode(bitcache << (CodeBits - len));
 #endif
+            len = 0;
         }
     }
 
