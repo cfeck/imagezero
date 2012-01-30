@@ -90,8 +90,26 @@ public:
         c[2] = x + y - xy;
 #elif 0
         // TODO (Paeth/PNG) predictor
+#elif 0
+        // "Average of Average, Plane" predictor
+        int x, y, xy;
+
+        x = p[C0 - bpp];
+        xy = p[C0 - bpp - bpr];
+        y = p[C0 - bpr];
+        c[0] = (3 * (x + y) - 2 * xy) >> 2;
+
+        x = p[C1 - bpp];
+        xy = p[C1 - bpp - bpr];
+        y = p[C1 - bpr];
+        c[1] = (3 * (x + y) - 2 * xy) >> 2;
+
+        x = p[C2 - bpp];
+        xy = p[C2 - bpp - bpr];
+        y = p[C2 - bpr];
+        c[2] = (3 * (x + y) - 2 * xy) >> 2;
 #else
-        // "Median of x, y, Plane" (LOCO-I) predictor
+        // "Median of x, y, Plane" (MED) predictor
         int x, y, xy, dx, dy, dxy, s;
 
         x = p[C0 - bpp];
