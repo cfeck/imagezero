@@ -32,7 +32,7 @@ makefiles: configure Makefile.am
 	$(AUTOMAKE) --add-missing --copy
 
 clean:
-	@rm -rf m4 *.lo *.la *.o *.a .libs .deps Makefile Makefile.in stamp-h1 iz_config.h*
+	@rm -rf m4 *.lo *.la *.o *.a .libs .deps Makefile Makefile.in stamp-h1 iz_config.h* iz_test
 	rm -rf aclocal.m4 autom4te.cache install.sh libtool 'configure.in~' missing config.h* configure 
 	rm -f config.guess config.log config.status config.sub cscope.out install-sh depcomp ltmain.sh _configs.sed 
 
