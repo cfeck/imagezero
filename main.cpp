@@ -36,7 +36,7 @@ static void encodeIZ(const char *infilename, const char *outfilename)
 {
     PortableImage pi;
     int infd = ::open(infilename, O_RDONLY);
-    if (infd < 0 || pi.read(infd)) {
+    if (infd >= 0 && pi.read(infd)) {
         if (pi.components() != 3) {
             fprintf(stderr, "Can only read 24 bit PPM files.\n");
             exit(EXIT_FAILURE);
