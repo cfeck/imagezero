@@ -49,6 +49,7 @@ if test x"$debug" = xyes ; then
   dnl Do not strip symbols from developer object files.
   INSTALL_STRIP_FLAG=""
 else
+  CXXFLAGS="$CXXFLAGS -O2 -mmmx -Winline -fomit-frame-pointer -fno-rtti -fno-exceptions"
   dnl Make sure to strip symbols from non-developer object files.
   INSTALL_STRIP_FLAG="-s"
 fi
