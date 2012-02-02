@@ -24,6 +24,7 @@ typedef unsigned long long U64;
 typedef unsigned int U32;
 #endif
 
+template<typename Code = U32>
 class BitCoderBase
 {
 protected:
@@ -39,7 +40,6 @@ protected:
      *
      * NOTE size(CacheBits) >= 2 * sizeof(CodeBits) must be true
      */
-    typedef U32 Code;
     typedef U64 Cache;
 
     enum Constants {
@@ -59,8 +59,13 @@ protected:
     Cache bitcache;
 };
 
-class BitDecoder : public BitCoderBase
+template<typename Code = U32>
+class BitDecoder : public BitCoderBase<Code>
 {
+    using BitCoderBase<Code>::len;
+    using BitCoderBase<Code>::bitcache;
+    using BitCoderBase<Code>::CodeBits;
+
 public:
     Code fetchCode() {
         return /*__builtin_bswap32*/(*p++);
@@ -139,8 +144,13 @@ private:
     Code *p;
 };
 
-class BitEncoder : public BitCoderBase
+template<typename Code = U32>
+class BitEncoder : public BitCoderBase<Code>
 {
+    using BitCoderBase<Code>::len;
+    using BitCoderBase<Code>::bitcache;
+    using BitCoderBase<Code>::CodeBits;
+
 public:
     void storeCode(Code code) {
         *p++ = /*__builtin_bswap32*/(code);

@@ -36,7 +36,7 @@ unsigned char *encodeImage(const PortableImage &pi, unsigned char *dest)
     memcpy(dBits, staticdBits, sizeof(dBits));
     memcpy(dCount, staticdCount, sizeof(dCount));
 
-    BitEncoder bc;
+    BitEncoder<> bc;
     bc.begin(dest);
     bc.writeValue(pi.width() - 1, 7);
     bc.writeValue(pi.height() - 1, 7);

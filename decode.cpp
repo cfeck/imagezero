@@ -25,7 +25,7 @@ namespace IZ {
 
 const unsigned char *decodeImage(PortableImage &pi, const unsigned char *src)
 {
-    BitDecoder bc;
+    BitDecoder<> bc;
     bc.begin(src);
 
     const int bpp = 3;

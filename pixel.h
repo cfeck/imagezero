@@ -198,14 +198,14 @@ public:
         return ::numBits(c[0] | c[1] | c[2]);
     }
 
-    void writeBits(BitEncoder &bc, int numBits) const {
+    void writeBits(BitEncoder<> &bc, int numBits) const {
         bc.writeBits(c[0], numBits);
         bc.writeBits(c[1], numBits);
         bc.writeBits(c[2], numBits);
         bc.flushCache();
     }
 
-    void readBits(BitDecoder &bc, int numBits) {
+    void readBits(BitDecoder<> &bc, int numBits) {
         c[0] = bc.readBits(numBits);
         c[1] = bc.readBits(numBits);
         c[2] = bc.readBits(numBits);
