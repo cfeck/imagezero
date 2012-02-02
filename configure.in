@@ -1,0 +1,61 @@
+dnl this files has to be processed by autoconf
+AC_PREREQ(2.61)
+
+AC_INIT([libiz],[0.0.1])
+AC_CONFIG_SRCDIR([README])
+AC_CONFIG_HEADERS(iz_config.h)
+AM_INIT_AUTOMAKE([no-define])
+AM_MAINTAINER_MODE
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_LD
+
+AM_PROG_LIBTOOL
+AC_PROG_INSTALL
+
+DEFAULT_INSTALL_PREFIX="/usr/local"
+
+AC_ARG_ENABLE(debug,
+  [AS_HELP_STRING([--enable-debug],[enable debugging symbols and compile flags])
+  ],
+  [
+    if test x"$enableval" = xyes ; then
+      debug="yes"
+    else
+      debug="no"
+    fi
+  ]
+)
+
+if test x"$debug" = xyes ; then
+  AC_DEFINE([IZ_DEBUG], [], [debug build])
+
+  if test x"$GCC" = xyes; then
+
+    dnl Remove any optimization flags from CFLAGS
+    changequote({,})
+    CFLAGS=`echo "$CFLAGS" | sed -e 's/-O[0-9s]*//g'`
+    CFLAGS=`echo "$CFLAGS" | sed -e 's/-g[0-2]\? //g'`
+    CXXFLAGS=`echo "$CXXFLAGS" | sed -e 's/-O[0-9s]*//g'`
+    CXXFLAGS=`echo "$CXXFLAGS" | sed -e 's/-g[0-2]\? //g'`
+    changequote([,])
+    CFLAGS="$CFLAGS -g3 -Wall -O0"
+    CXXFLAGS="$CXXFLAGS -g3 -Wall -O0"
+
+  fi
+
+  dnl Do not strip symbols from developer object files.
+  INSTALL_STRIP_FLAG=""
+else
+  CXXFLAGS="$CXXFLAGS -O2 -mmmx -Winline -fomit-frame-pointer -fno-rtti -fno-exceptions"
+  dnl Make sure to strip symbols from non-developer object files.
+  INSTALL_STRIP_FLAG="-s"
+fi
+
+AC_SUBST(INSTALL_STRIP_FLAG)
+
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
+
