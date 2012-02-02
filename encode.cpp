@@ -22,12 +22,12 @@ namespace IZ {
     pix.writeBits(bc, nl);                       \
 }
 
-unsigned char *encodeImage(const PortableImage &pi, unsigned char *dest)
+unsigned char *encodeImage(const Image<> &im, unsigned char *dest)
 {
     const int bpp = 3;
-    const int bpr = bpp * pi.width();
-    const unsigned char *p = pi.data();
-    int size = pi.width() * pi.height();
+    const int bpr = im.samplesPerLine();
+    const unsigned char *p = im.data();
+    int size = im.width() * im.height();
     const unsigned char *pend = p + bpp * size;
     unsigned int cx = (7 << CONTEXT_BITS) + 7;
 
@@ -38,8 +38,8 @@ unsigned char *encodeImage(const PortableImage &pi, unsigned char *dest)
 
     BitEncoder<> bc;
     bc.begin(dest);
-    bc.writeValue(pi.width() - 1, 7);
-    bc.writeValue(pi.height() - 1, 7);
+    bc.writeValue(im.width() - 1, 7);
+    bc.writeValue(im.height() - 1, 7);
 
     /* first pixel in first line */
     encodePixel(predict0);

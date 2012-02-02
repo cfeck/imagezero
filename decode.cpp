@@ -23,21 +23,21 @@ namespace IZ {
     p += bpp;                                   \
 }
 
-const unsigned char *decodeImage(PortableImage &pi, const unsigned char *src)
+const unsigned char *decodeImage(Image<> &im, const unsigned char *src)
 {
     BitDecoder<> bc;
     bc.begin(src);
 
     const int bpp = 3;
-    pi.setComponents(bpp);
     int w = bc.readValue(7) + 1;
     int h = bc.readValue(7) + 1;
-    pi.setWidth(w);
-    pi.setHeight(h);
+    im.setWidth(w);
+    im.setHeight(h);
     int size = w * h;
     unsigned char *p = new unsigned char[size * bpp];
-    pi.setData(p);
-    const int bpr = bpp * pi.width();
+    im.setData(p);
+    const int bpr = bpp * im.width();
+    im.setSamplesPerLine(bpr);
     unsigned char *pend = p + bpp * size;
     int pl = 7;
 

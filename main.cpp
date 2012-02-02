@@ -6,6 +6,7 @@
 #include <cstring>
 
 #include "libiz.h"
+#include "portableimage.h"
 
 using namespace IZ;
 
@@ -25,6 +26,7 @@ static void decodeIZ(const char *infilename, const char *outfilename)
     unsigned char *src = new unsigned char[1024*1024*300];
     ::read(infd, src, 1024*1024*300);
     initDecodeTable();
+    pi.setComponents(3);
     decodeImage(pi, src);
     pi.write(outfd);
     ::close(infd);

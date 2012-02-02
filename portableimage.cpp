@@ -84,6 +84,8 @@ bool PortableImage::readHeader(const unsigned char *p)
     p = readValue(p, m_height);
     p = readValue(p, m_maxVal);
 
+    setSamplesPerLine(m_components * m_width);
+
     if (m_maxVal != 255)
         return false;
 
