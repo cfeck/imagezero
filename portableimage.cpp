@@ -1,8 +1,16 @@
 #include "portableimage.h"
 
+#if defined(__MINGW32__)
+// assume we have no mmap
+#undef HAVE_MMAP
+#else
 #include <sys/mman.h>
+#define HAVE_MMAP
+#endif
+
 #include <sys/stat.h>
-#include <sys/unistd.h>
+#include <unistd.h>
+
 #include <cstdlib>
 
 static unsigned char *writeValue(unsigned char *p, unsigned char whiteSpace, int value)
@@ -84,10 +92,10 @@ bool PortableImage::readHeader(const unsigned char *p)
     p = readValue(p, m_height);
     p = readValue(p, m_maxVal);
 
-    setSamplesPerLine(m_components * m_width);
-
-    if (m_maxVal != 255)
+    if (m_maxVal != 255 || m_width < 1 || m_height < 1)
         return false;
+
+    setSamplesPerLine(m_components * m_width);
 
     ++p; // skip single space
     m_data = p;
@@ -96,13 +104,17 @@ bool PortableImage::readHeader(const unsigned char *p)
 
 PortableImage::PortableImage()
     : m_components(0)
+#if defined(HAVE_MMAP)
     , m_buffer(MAP_FAILED)
+#else
+    , m_buffer(0)
+#endif
 {
 }
 
 PortableImage::~PortableImage()
 {
-#if 1
+#if defined(HAVE_MMAP)
     if (m_buffer != MAP_FAILED)
         munmap(m_buffer, m_bufferSize);
 #else
@@ -112,7 +124,7 @@ PortableImage::~PortableImage()
 
 bool PortableImage::read(int fd)
 {
-#if 1
+#if defined(HAVE_MMAP)
     struct stat sb;
     fstat(fd, &sb);
     m_bufferSize = sb.st_size;
@@ -127,7 +139,16 @@ bool PortableImage::read(int fd)
     fstat(fd, &sb);
     m_bufferSize = sb.st_size;
     m_buffer = malloc(m_bufferSize);
-    if (::read(fd, m_buffer, m_bufferSize) != m_bufferSize || !readHeader((unsigned char *) m_buffer)) {
+    int pos = 0;
+    int remaining = m_bufferSize;
+    while (remaining > 0) {
+        int bytesRead = ::read(fd, (char *) m_buffer + pos, remaining);
+        if (bytesRead < 0)
+            break;
+        remaining -= bytesRead;
+        pos += bytesRead;
+    }
+    if (remaining > 0 || !readHeader((unsigned char *) m_buffer)) {
         m_components = 0;
         return false;
     }
