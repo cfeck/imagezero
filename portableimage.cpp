@@ -1,6 +1,7 @@
 #include "portableimage.h"
 
 #if defined(__MINGW32__)
+#error mmap needs to be ported to Windows
 // assume we have no mmap
 #undef HAVE_MMAP
 #else
