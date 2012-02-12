@@ -38,38 +38,6 @@ public:
         c[2] = predictor(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
     }
 
-    void predict0(const U *p, int bpp, int bpr) {
-        predict(p, bpp, bpr, Predictor0<U>::predict);
-    }
-
-    void predict1x(const U *p, int bpp, int bpr) {
-        predict(p, bpp, bpr, Predictor1x<U>::predict);
-    }
-
-    void predict1y(const U *p, int bpp, int bpr) {
-        predict(p, bpp, bpr, Predictor1y<U>::predict);
-    }
-
-    void predict2(const U *p, int bpp, int bpr) {
-        // "(x + y) / 2" (Average) predictor
-        predict(p, bpp, bpr, Predictor2avg<U>::predict);
-    }
-
-    void predict3(const U *p, int bpp, int bpr) {
-#if 0
-        // "x + y - xy" (Plane) predictor
-        predict(p, bpp, bpr, Predictor3plane<U>::predict);
-#elif 0
-        // TODO (Paeth/PNG) predictor
-#elif 0
-        // "Average of Average, Plane" predictor
-        predict(p, bpp, bpr, Predictor3avgplane<U>::predict);
-#else
-        // "Median of x, y, Plane" (MED) predictor
-        predict(p, bpp, bpr, Predictor3med<U>::predict);
-#endif
-    }
-
     void operator-=(const Pixel<U> &other) {
         c[0] -= other.c[0];
         c[1] -= other.c[1];

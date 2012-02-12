@@ -5,7 +5,7 @@
 
 namespace IZ {
 
-#define decodePixel(predict)                    \
+#define decodePixel(predictor)                  \
 {                                               \
     Pixel<> pix, pp;                            \
                                                 \
@@ -17,7 +17,7 @@ namespace IZ {
                                                 \
     pix.toSigned();                             \
     pix.reverseTransform();                     \
-    pp.predict(p, bpp, bpr);                    \
+    pp.predict(p, bpp, bpr, predictor::predict); \
     pix += pp;                                  \
     pix.writeTo(p);                             \
     p += bpp;                                   \
@@ -45,19 +45,19 @@ const unsigned char *decodeImage(Image<> &im, const unsigned char *src)
     memcpy(dCount, staticdCount, sizeof(dCount));
 
     /* first pixel in first line */
-    decodePixel(predict0);
+    decodePixel(Predictor0<>);
     /* remaining pixels in first line */
     const unsigned char *endline = p + bpr - bpp;
     while (p != endline) {
-        decodePixel(predict1x);
+        decodePixel(Predictor1x<>);
     }
     while (p != pend) {
         /* first pixel in remaining lines */
-        decodePixel(predict1y);
+        decodePixel(Predictor1y<>);
         /* remaining pixels in remaining lines */
         const unsigned char *endline = p + bpr - bpp;
         while (p != endline) {
-            decodePixel(predict3);
+            decodePixel(Predictor3med<>);
         }
     }
     return bc.end();

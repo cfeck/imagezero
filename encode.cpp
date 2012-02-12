@@ -5,12 +5,12 @@
 
 namespace IZ {
 
-#define encodePixel(predict)                     \
+#define encodePixel(predictor)                   \
 {                                                \
     Pixel<> pix, pp;                             \
                                                  \
     pix.readFrom(p);                             \
-    pp.predict(p, bpp, bpr);                     \
+    pp.predict(p, bpp, bpr, predictor::predict); \
     pix -= pp;                                   \
     pix.forwardTransform();                      \
     p += bpp;                                    \
@@ -42,19 +42,19 @@ unsigned char *encodeImage(const Image<> &im, unsigned char *dest)
     bc.writeValue(im.height() - 1, 7);
 
     /* first pixel in first line */
-    encodePixel(predict0);
+    encodePixel(Predictor0<>);
     /* remaining pixels in first line */
     const unsigned char *endline = p + bpr - bpp;
     while (p != endline) {
-        encodePixel(predict1x);
+        encodePixel(Predictor1x<>);
     }
     while (p != pend) {
         /* first pixel in remaining lines */
-        encodePixel(predict1y);
+        encodePixel(Predictor1y<>);
         /* remaining pixels in remaining lines */
         const unsigned char *endline = p + bpr - bpp;
         while (p != endline) {
-            encodePixel(predict3);
+            encodePixel(Predictor3med<>);
         }
     }
     return bc.end();
