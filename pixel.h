@@ -32,49 +32,41 @@ public:
         p[C2] = c[2];
     }
 
+    void predict(const U *p, int bpp, int bpr, int (*predictor)(int, int, int)) {
+        c[0] = predictor(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
+        c[1] = predictor(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
+        c[2] = predictor(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
+    }
+
     void predict0(const U *p, int bpp, int bpr) {
-        c[0] = Predictor0<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
-        c[1] = Predictor0<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
-        c[2] = Predictor0<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
+        predict(p, bpp, bpr, Predictor0<U>::predict);
     }
 
     void predict1x(const U *p, int bpp, int bpr) {
-        c[0] = Predictor1x<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
-        c[1] = Predictor1x<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
-        c[2] = Predictor1x<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
+        predict(p, bpp, bpr, Predictor1x<U>::predict);
     }
 
     void predict1y(const U *p, int bpp, int bpr) {
-        c[0] = Predictor1y<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
-        c[1] = Predictor1y<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
-        c[2] = Predictor1y<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
+        predict(p, bpp, bpr, Predictor1y<U>::predict);
     }
 
     void predict2(const U *p, int bpp, int bpr) {
         // "(x + y) / 2" (Average) predictor
-        c[0] = Predictor2avg<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
-        c[1] = Predictor2avg<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
-        c[2] = Predictor2avg<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
+        predict(p, bpp, bpr, Predictor2avg<U>::predict);
     }
 
     void predict3(const U *p, int bpp, int bpr) {
 #if 0
         // "x + y - xy" (Plane) predictor
-        c[0] = Predictor3plane<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
-        c[1] = Predictor3plane<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
-        c[2] = Predictor3plane<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
+        predict(p, bpp, bpr, Predictor3plane<U>::predict);
 #elif 0
         // TODO (Paeth/PNG) predictor
 #elif 0
         // "Average of Average, Plane" predictor
-        c[0] = Predictor3avgplane<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
-        c[1] = Predictor3avgplane<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
-        c[2] = Predictor3avgplane<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
+        predict(p, bpp, bpr, Predictor3avgplane<U>::predict);
 #else
         // "Median of x, y, Plane" (MED) predictor
-        c[0] = Predictor3med<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
-        c[1] = Predictor3med<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
-        c[2] = Predictor3med<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
+        predict(p, bpp, bpr, Predictor3med<U>::predict);
 #endif
     }
 
