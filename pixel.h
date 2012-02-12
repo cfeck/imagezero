@@ -2,10 +2,9 @@
 #define IZ_PIXEL_H 1
 
 #include "intmacros.h"
+#include "predict.h"
 
 namespace IZ {
-
-#define UNUSED(x) { x = x; }
 
 template<typename U = unsigned char>
 class Pixel
@@ -34,113 +33,48 @@ public:
     }
 
     void predict0(const U *p, int bpp, int bpr) {
-        UNUSED(p); UNUSED(bpp); UNUSED(bpr);
-//        const int v = 1 << (sizeof(U) * CHAR_BIT - 1);
-        const int v = 0;
-        c[0] = v;
-        c[1] = v;
-        c[2] = v;
+        c[0] = Predictor0<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
+        c[1] = Predictor0<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
+        c[2] = Predictor0<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
     }
 
     void predict1x(const U *p, int bpp, int bpr) {
-        UNUSED(bpr);
-        readFrom(p - bpp);
+        c[0] = Predictor1x<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
+        c[1] = Predictor1x<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
+        c[2] = Predictor1x<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
     }
 
     void predict1y(const U *p, int bpp, int bpr) {
-        UNUSED(bpp);
-        readFrom(p - bpr);
+        c[0] = Predictor1y<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
+        c[1] = Predictor1y<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
+        c[2] = Predictor1y<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
     }
 
     void predict2(const U *p, int bpp, int bpr) {
         // "(x + y) / 2" (Average) predictor
-        int x, y;
-
-        x = p[C0 - bpp];
-        y = p[C0 - bpr];
-        c[0] = (x + y) >> 1;
-
-        x = p[C1 - bpp];
-        y = p[C1 - bpr];
-        c[1] = (x + y) >> 1;
-
-        x = p[C2 - bpp];
-        y = p[C2 - bpr];
-        c[2] = (x + y) >> 1;
+        c[0] = Predictor2avg<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
+        c[1] = Predictor2avg<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
+        c[2] = Predictor2avg<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
     }
 
     void predict3(const U *p, int bpp, int bpr) {
 #if 0
         // "x + y - xy" (Plane) predictor
-        int x, y, xy;
-
-        x = p[C0 - bpp];
-        xy = p[C0 - bpp - bpr];
-        y = p[C0 - bpr];
-        c[0] = x + y - xy;
-
-        x = p[C1 - bpp];
-        xy = p[C1 - bpp - bpr];
-        y = p[C1 - bpr];
-        c[1] = x + y - xy;
-
-        x = p[C2 - bpp];
-        xy = p[C2 - bpp - bpr];
-        y = p[C2 - bpr];
-        c[2] = x + y - xy;
+        c[0] = Predictor3plane<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
+        c[1] = Predictor3plane<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
+        c[2] = Predictor3plane<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
 #elif 0
         // TODO (Paeth/PNG) predictor
 #elif 0
         // "Average of Average, Plane" predictor
-        int x, y, xy;
-
-        x = p[C0 - bpp];
-        xy = p[C0 - bpp - bpr];
-        y = p[C0 - bpr];
-        c[0] = (3 * (x + y) - 2 * xy) >> 2;
-
-        x = p[C1 - bpp];
-        xy = p[C1 - bpp - bpr];
-        y = p[C1 - bpr];
-        c[1] = (3 * (x + y) - 2 * xy) >> 2;
-
-        x = p[C2 - bpp];
-        xy = p[C2 - bpp - bpr];
-        y = p[C2 - bpr];
-        c[2] = (3 * (x + y) - 2 * xy) >> 2;
+        c[0] = Predictor3avgplane<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
+        c[1] = Predictor3avgplane<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
+        c[2] = Predictor3avgplane<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
 #else
         // "Median of x, y, Plane" (MED) predictor
-        int x, y, xy, dx, dy, dxy, s;
-
-        x = p[C0 - bpp];
-        xy = p[C0 - bpp - bpr];
-        y = p[C0 - bpr];
-        dy = x - xy;
-        dx = xy - y;
-        dxy = x - y;
-        s = oppositeSign(dy, dx);
-        dxy &= oppositeSign(dxy, dy);
-        c[0] = selectVal(s, y + dy, x - dxy);
-
-        x = p[C1 - bpp];
-        xy = p[C1 - bpp - bpr];
-        y = p[C1 - bpr];
-        dy = x - xy;
-        dx = xy - y;
-        dxy = x - y;
-        s = oppositeSign(dy, dx);
-        dxy &= oppositeSign(dxy, dy);
-        c[1] = selectVal(s, y + dy, x - dxy);
-
-        x = p[C2 - bpp];
-        xy = p[C2 - bpp - bpr];
-        y = p[C2 - bpr];
-        dy = x - xy;
-        dx = xy - y;
-        dxy = x - y;
-        s = oppositeSign(dy, dx);
-        dxy &= oppositeSign(dxy, dy);
-        c[2] = selectVal(s, y + dy, x - dxy);
+        c[0] = Predictor3med<U>::predict(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
+        c[1] = Predictor3med<U>::predict(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
+        c[2] = Predictor3med<U>::predict(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);
 #endif
     }
 
