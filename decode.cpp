@@ -9,6 +9,7 @@ namespace IZ {
 {                                               \
     Pixel<> pix, pp;                            \
                                                 \
+    pp.predict(p, bpp, bpr, predictor::predict); \
     this->fillCache();                          \
     int nl = decodeTable[pl][this->peekBits(MAX_CODE_LENGTH)]; \
     this->skipBits(dCount[(pl << CONTEXT_BITS) + nl]); \
@@ -17,7 +18,6 @@ namespace IZ {
                                                 \
     pix.toSigned();                             \
     pix.reverseTransform();                     \
-    pp.predict(p, bpp, bpr, predictor::predict); \
     pix += pp;                                  \
     pix.writeTo(p);                             \
     p += bpp;                                   \
