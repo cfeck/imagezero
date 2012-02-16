@@ -9,11 +9,11 @@ namespace IZ {
 {                                               \
     Pixel<> pix, pp;                            \
                                                 \
-    bc.fillCache();                             \
-    int nl = decodeTable[pl][bc.peekBits(MAX_CODE_LENGTH)]; \
-    bc.skipBits(dCount[(pl << CONTEXT_BITS) + nl]); \
+    this->fillCache();                          \
+    int nl = decodeTable[pl][this->peekBits(MAX_CODE_LENGTH)]; \
+    this->skipBits(dCount[(pl << CONTEXT_BITS) + nl]); \
     pl = nl;                                    \
-    pix.readBits(bc, nl);                       \
+    pix.readBits(*this, nl);                    \
                                                 \
     pix.toSigned();                             \
     pix.reverseTransform();                     \
@@ -23,44 +23,65 @@ namespace IZ {
     p += bpp;                                   \
 }
 
-const unsigned char *decodeImage(Image<> &im, const unsigned char *src)
+template <
+    int bpp = 3,
+    typename Code = U32
+>
+class ImageDecoder : public BitDecoder<Code>
 {
-    BitDecoder<> bc;
-    bc.begin(src);
-
-    const int bpp = 3;
-    int w = bc.readValue(7) + 1;
-    int h = bc.readValue(7) + 1;
-    im.setWidth(w);
-    im.setHeight(h);
-    int size = w * h;
-    unsigned char *p = new unsigned char[size * bpp];
-    im.setData(p);
-    const int bpr = bpp * im.width();
-    im.setSamplesPerLine(bpr);
-    unsigned char *pend = p + bpp * size;
-    int pl = 7;
-
-    unsigned int dCount[1 << (2 * CONTEXT_BITS)];
-    memcpy(dCount, staticdCount, sizeof(dCount));
-
-    /* first pixel in first line */
-    decodePixel(Predictor0<>);
-    /* remaining pixels in first line */
-    const unsigned char *endline = p + bpr - bpp;
-    while (p != endline) {
-        decodePixel(Predictor1x<>);
+public:
+    ImageDecoder() {
+        memcpy(dCount, staticdCount, sizeof(dCount));
     }
-    while (p != pend) {
-        /* first pixel in remaining lines */
-        decodePixel(Predictor1y<>);
-        /* remaining pixels in remaining lines */
+
+    void decodeImagePixels(Image<> &im) {
+        unsigned char *p = (unsigned char *) im.data();
+        const int bpr = bpp * im.width();
+        im.setSamplesPerLine(bpr);
+        const int size = im.width() * im.height();
+        unsigned char *pend = p + bpp * size;
+        int pl = 7;
+
+        /* first pixel in first line */
+        decodePixel(Predictor0<>);
+        /* remaining pixels in first line */
         const unsigned char *endline = p + bpr - bpp;
         while (p != endline) {
-            decodePixel(Predictor3med<>);
+            decodePixel(Predictor1x<>);
+        }
+        while (p != pend) {
+            /* first pixel in remaining lines */
+            decodePixel(Predictor1y<>);
+            /* remaining pixels in remaining lines */
+            const unsigned char *endline = p + bpr - bpp;
+            while (p != endline) {
+                decodePixel(Predictor3med<>);
+            }
         }
     }
-    return bc.end();
+
+    void decodeImageSize(Image<> &im) {
+        int w = this->readValue(7) + 1;
+        int h = this->readValue(7) + 1;
+        im.setWidth(w);
+        im.setHeight(h);
+    }
+
+private:
+    unsigned int dCount[1 << (2 * CONTEXT_BITS)];
+};
+
+const unsigned char *decodeImage(Image<> &im, const unsigned char *src)
+{
+    const int bpp = 3;
+    ImageDecoder<> ic;
+    ic.begin(src);
+    ic.decodeImageSize(im);
+    int size = im.width() * im.height();
+    unsigned char *p = new unsigned char[size * bpp];
+    im.setData(p);
+    ic.decodeImagePixels(im);
+    return ic.end();
 }
 
 } // namespace IZ
