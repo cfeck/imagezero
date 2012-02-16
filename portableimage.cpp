@@ -1,12 +1,11 @@
+#ifdef HAVE_CONFIG_H
+#include "iz_config.h"
+#endif
+
 #include "portableimage.h"
 
-#if defined(__MINGW32__)
-#error mmap needs to be ported to Windows
-// assume we have no mmap
-#undef HAVE_MMAP
-#else
+#if defined(HAVE_MMAP)
 #include <sys/mman.h>
-#define HAVE_MMAP
 #endif
 
 #include <sys/stat.h>
