@@ -25,6 +25,7 @@ namespace IZ {
 
 template <
     int bpp = 3,
+    typename Predictor = Predictor3med<>,
     typename Code = U32
 >
 class ImageDecoder : public BitDecoder<Code>
@@ -55,7 +56,7 @@ public:
             /* remaining pixels in remaining lines */
             const unsigned char *endline = p + bpr - bpp;
             while (p != endline) {
-                decodePixel(Predictor3med<>);
+                decodePixel(Predictor);
             }
         }
     }
