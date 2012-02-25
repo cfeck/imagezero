@@ -5,8 +5,8 @@
 
 namespace IZ {
 
-void initDecodeTable(void);
-void initEncodeTable(void);
+void initDecodeTable();
+void initEncodeTable();
 
 const unsigned char *decodeImage(Image<> &im, const unsigned char *src);
 unsigned char *encodeImage(const Image<> &im, unsigned char *dest);

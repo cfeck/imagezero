@@ -44,7 +44,7 @@ static int comp_int(const void *p1, const void *p2)
   return *((int *) p1) - *((int *) p2);
 }
 
-static void initBitsTable(void)
+static void initBitsTable()
 {
     int sorted[CONTEXT_COUNT];
     for (int pc = 0; pc < CONTEXT_COUNT; ++pc) {
@@ -70,14 +70,14 @@ static void initBitsTable(void)
     }
 }
 
-void initEncodeTable(void)
+void initEncodeTable()
 {
     initBitsTable();
 }
 
 //#define CHECKTABLE
 
-void initDecodeTable(void)
+void initDecodeTable()
 {
     initBitsTable();
 #ifdef CHECKTABLE
