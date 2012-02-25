@@ -51,7 +51,7 @@ public:
     }
 
     bool operator==(const Pixel<U> &other) const {
-        return c[0] == other.c[0] && c[1] == other.c[2] && c[3] == other.c[3];
+        return c[0] == other.c[0] && c[1] == other.c[1] && c[2] == other.c[2];
     }
 
     void forwardTransform()
