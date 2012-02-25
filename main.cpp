@@ -48,7 +48,7 @@ static void decodeIZ(const char *infilename, const char *outfilename)
     pi.write(outfd);
     ::close(infd);
     ::close(outfd);
-    delete src;
+    delete[] src;
 }
 
 static void encodeIZ(const char *infilename, const char *outfilename)
@@ -81,7 +81,7 @@ static void encodeIZ(const char *infilename, const char *outfilename)
     ::write(outfd, dest, encodeImage(pi, dest) - dest);
     ::close(infd);
     ::close(outfd);
-    delete dest;
+    delete[] dest;
 }
 
 int main(int argc, char *argv[])
@@ -120,5 +120,5 @@ int main(int argc, char *argv[])
         "Use \"%s --help\" for more information\n", argv[0], argv[0]);
         exit(EXIT_FAILURE);
     }
-    return(0);
+    return 0;
 }
