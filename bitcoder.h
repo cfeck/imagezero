@@ -126,20 +126,6 @@ public:
         return (unsigned char *) (p - 1);
     }
 
-    unsigned int readValue(unsigned int RB) {
-        unsigned int pos = RB;
-        unsigned int mask = bitMask(pos);
-        fillCache();
-        unsigned int v = readBits(RB + 1);
-        while (v <= mask) {
-            fillCache();
-            v |= readBits(RB + 1) << pos;
-            pos += RB;
-            mask = bitMask(pos);
-        }
-        return v & mask;
-    }
-
 private:
     Code *p;
 };
@@ -202,19 +188,6 @@ public:
     unsigned char *end() {
         align();
         return (unsigned char *) p;
-    }
-
-    void writeValue(unsigned int v, unsigned int RB) {
-        do {
-            if (v >= (1U << RB)) {
-                writeBits(v & bitMask(RB), 1 + RB);
-                flushCache();
-            } else {
-                writeBits(v + (1U << RB), 1 + RB);
-                flushCache();
-            }
-            v >>= RB;
-        } while (v != 0);
     }
 
 private:

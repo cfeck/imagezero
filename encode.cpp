@@ -61,8 +61,13 @@ public:
     }
 
     void encodeImageSize(const Image<> &im) {
-        this->writeValue(im.width() - 1, 7);
-        this->writeValue(im.height() - 1, 7);
+        int w = im.width() - 1;
+        int h = im.height() - 1;
+        int b = ::numBits(w | h);
+        this->writeBits(b, 4);
+        this->writeBits(w, b);
+        this->writeBits(h, b);
+        this->flushCache();
     }
 
 private:

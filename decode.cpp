@@ -62,8 +62,10 @@ public:
     }
 
     void decodeImageSize(Image<> &im) {
-        int w = this->readValue(7) + 1;
-        int h = this->readValue(7) + 1;
+        this->fillCache();
+        int b = this->readBits(4);
+        int w = this->readBits(b) + 1;
+        int h = this->readBits(b) + 1;
         im.setWidth(w);
         im.setHeight(h);
     }
