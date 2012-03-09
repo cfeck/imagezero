@@ -17,7 +17,7 @@ const unsigned char *decodeImage(Image<> &im, const unsigned char *src)
 {
     ImageDecoder<> ic;
     ic.begin(src);
-    ic.decodeImageSize(im);
+    ic.skipImageSize();
     ic.decodeImagePixels(im);
     return ic.end();
 }

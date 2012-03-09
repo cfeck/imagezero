@@ -72,6 +72,12 @@ public:
         im.setHeight(h);
     }
 
+    void skipImageSize() {
+        this->fillCache();
+        int b = this->readBits(4);
+        this->skipBits(2 * b);
+    }
+
 private:
     unsigned int dCount[1 << (2 * CONTEXT_BITS)];
 };
