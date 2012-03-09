@@ -1,0 +1,221 @@
+#include "file.h"
+
+#ifdef HAVE_CONFIG_H
+#include "iz_config.h"
+#endif
+
+#if defined(HAVE_MMAP)
+
+/// POSIX implementation
+
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+
+class InputFile::Private
+{
+public:
+    Private() : addr(MAP_FAILED) { }
+
+    void *addr;
+    int size;
+};
+
+InputFile::InputFile(const char *filename)
+    : d(new Private)
+{
+    int fd = open(filename, O_RDONLY);
+    if (fd != -1) {
+        struct stat sb;
+        fstat(fd, &sb);
+        d->size = sb.st_size;
+        d->addr = mmap(0, d->size, PROT_READ, MAP_PRIVATE, fd, 0);
+        close(fd);
+    }
+}
+
+InputFile::~InputFile()
+{
+    if (d->addr != MAP_FAILED) {
+        munmap(d->addr, d->size);
+    }
+    delete d;
+}
+
+bool InputFile::isReadable() const
+{
+    return d->addr != MAP_FAILED;
+}
+
+const unsigned char *InputFile::data() const
+{
+    return (const unsigned char *) d->addr;
+}
+
+int InputFile::dataSize() const
+{
+    return d->size;
+}
+
+
+class OutputFile::Private
+{
+public:
+    Private() { }
+
+    int fd;
+    int mapSize;
+};
+
+OutputFile::OutputFile(const char *filename)
+    : d(new Private)
+{
+    d->fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, 0644);
+}
+
+OutputFile::~OutputFile()
+{
+    if (d->fd) {
+        close(d->fd);
+    }
+    delete d;
+}
+
+bool OutputFile::isWritable() const
+{
+    if (d->fd != -1) {
+        return true;
+    }
+    return false;
+}
+
+unsigned char *OutputFile::prepareData(int maxSize)
+{
+    if (d->fd != -1) {
+        ftruncate(d->fd, maxSize);
+        d->mapSize = maxSize;
+        void *addr = mmap(0, d->mapSize, PROT_WRITE | PROT_READ, MAP_SHARED, d->fd, 0);
+        if (addr != MAP_FAILED) {
+            return (unsigned char *) addr;
+        }
+    }
+    return 0;
+}
+
+void OutputFile::commitData(unsigned char *data, int size)
+{
+    if (data) {
+        munmap(data, d->mapSize);
+        ftruncate(d->fd, size);
+    }
+}
+
+#else // defined(HAVE_MMAP)
+
+/// STDC implementation
+
+#include <cstdio>
+#include <cstdlib>
+
+class InputFile::Private
+{
+public:
+    Private() : buffer(0), size(0) { }
+
+    unsigned char *buffer;
+    int size;
+};
+
+InputFile::InputFile(const char *filename)
+    : d(new Private)
+{
+    FILE *fp = fopen(filename, "rb");
+    if (fp) {
+        setbuf(fp, 0);
+        fseek(fp, 0, SEEK_END);
+        d->size = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
+        if (d->size > 0) {
+            d->buffer = (unsigned char *) malloc(d->size);
+            if (d->buffer) {
+                d->size = fread(d->buffer, 1, d->size, fp);
+            }
+        }
+        fclose(fp);
+    }
+}
+
+InputFile::~InputFile()
+{
+    if (d->buffer) {
+        free(d->buffer);
+    }
+    delete d;
+}
+
+bool InputFile::isReadable() const
+{
+    return d->buffer != 0;
+}
+
+const unsigned char *InputFile::data() const
+{
+    return d->buffer;
+}
+
+int InputFile::dataSize() const
+{
+    return d->size;
+}
+
+
+class OutputFile::Private
+{
+public:
+    Private() { }
+
+    FILE *fp;
+};
+
+OutputFile::OutputFile(const char *filename)
+    : d(new Private)
+{
+    d->fp = fopen(filename, "wb");
+    if (d->fp) {
+        setbuf(d->fp, 0);
+    }
+}
+
+OutputFile::~OutputFile()
+{
+    if (d->fp) {
+        fclose(d->fp);
+    }
+    delete d;
+}
+
+bool OutputFile::isWritable() const
+{
+    if (d->fp) {
+        return true;
+    }
+    return false;
+}
+
+unsigned char *OutputFile::prepareData(int maxSize)
+{
+    return (unsigned char *) malloc(maxSize);
+}
+
+void OutputFile::commitData(unsigned char *data, int size)
+{
+    if (data) {
+        if (d->fp) {
+            fwrite(data, 1, size, d->fp);
+        }
+        free(data);
+    }
+}
+
+#endif // defined(HAVE_MMAP)
