@@ -3,8 +3,6 @@
 #include <cstring>
 
 #include "libiz.h"
-#include "encoder.h"
-#include "decoder.h"
 #include "portableimage.h"
 #include "file.h"
 
@@ -21,10 +19,9 @@ static void decodeIZ(const char *infilename, const char *outfilename)
         perror("Cannot open output file");
         exit(EXIT_FAILURE);
     }
+    const unsigned char *src = infile.data();
     IZ::initDecodeTable();
-    IZ::ImageDecoder<3> ic;
-    ic.begin(infile.data());
-    ic.decodeImageSize(pi);
+    IZ::decodeImageSize(pi, src);
     pi.setComponents(3);
     const unsigned int dataSize = pi.width() * pi.height() * pi.components();
     unsigned char *dest = outfile.prepareData(dataSize + 33);
@@ -33,7 +30,7 @@ static void decodeIZ(const char *infilename, const char *outfilename)
         exit(EXIT_FAILURE);
     }
     pi.writeHeader(dest);
-    ic.decodeImagePixels(pi);
+    IZ::decodeImage(pi, src);
     outfile.commitData(dest, pi.data() - dest + dataSize);
 }
 
@@ -67,19 +64,9 @@ static void encodeIZ(const char *infilename, const char *outfilename)
         perror("Cannot write output file");
         exit(EXIT_FAILURE);
     }
-#if 0
     IZ::initEncodeTable();
-    IZ::ImageEncoder<3> ic;
-    ic.begin(dest);
-    ic.encodeImageSize(pi);
-    ic.encodeImagePixels(pi);
-    unsigned char *destEnd = ic.end();
+    unsigned char *destEnd = IZ::encodeImage(pi, dest);
     outfile.commitData(dest, destEnd - dest);
-#else
-    IZ::initEncodeTable();
-    unsigned char *destEnd = encodeImage(pi, dest);
-    outfile.commitData(dest, destEnd - dest);
-#endif
 }
 
 int main(int argc, char *argv[])
