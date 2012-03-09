@@ -8,6 +8,7 @@
 
 /// POSIX implementation
 
+#include <cstdlib>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -30,7 +31,13 @@ InputFile::InputFile(const char *filename)
         struct stat sb;
         fstat(fd, &sb);
         d->size = sb.st_size;
-        d->addr = mmap(0, d->size, PROT_READ, MAP_PRIVATE, fd, 0);
+        d->addr = mmap(0, d->size, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
+        if (d->addr == MAP_FAILED) {
+            d->addr = mmap(0, d->size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+            if (d->addr != MAP_FAILED) {
+                read(fd, d->addr, d->size);
+            }
+        }
         close(fd);
     }
 }
@@ -99,6 +106,9 @@ unsigned char *OutputFile::prepareData(int maxSize)
         if (addr != MAP_FAILED) {
             return (unsigned char *) addr;
         }
+        ftruncate(d->fd, 0);
+        d->mapSize = 0;
+        return (unsigned char *) malloc(maxSize);
     }
     return 0;
 }
@@ -106,8 +116,13 @@ unsigned char *OutputFile::prepareData(int maxSize)
 void OutputFile::commitData(unsigned char *data, int size)
 {
     if (data) {
-        munmap(data, d->mapSize);
-        ftruncate(d->fd, size);
+        if (d->mapSize) {
+            munmap(data, d->mapSize);
+            ftruncate(d->fd, size);
+        } else {
+            write(d->fd, data, size);
+            free(data);
+        }
     }
 }
 
