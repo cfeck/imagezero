@@ -4,6 +4,7 @@
 #include "intmacros.h"
 #include "bitcoder.h"
 #include "pixel.h"
+#include "image.h"
 
 namespace IZ {
 

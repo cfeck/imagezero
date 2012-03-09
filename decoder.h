@@ -1,6 +1,8 @@
+#ifndef IZ_DECODER_H
+#define IZ_DECODER_H 1
+
 #include <cstring>
 
-#include "libiz.h"
 #include "iz_p.h"
 
 namespace IZ {
@@ -74,17 +76,6 @@ private:
     unsigned int dCount[1 << (2 * CONTEXT_BITS)];
 };
 
-const unsigned char *decodeImage(Image<> &im, const unsigned char *src)
-{
-    const int bpp = 3;
-    ImageDecoder<> ic;
-    ic.begin(src);
-    ic.decodeImageSize(im);
-    int size = im.width() * im.height();
-    unsigned char *p = new unsigned char[size * bpp];
-    im.setData(p);
-    ic.decodeImagePixels(im);
-    return ic.end();
-}
-
 } // namespace IZ
+
+#endif

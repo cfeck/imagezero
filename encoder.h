@@ -1,6 +1,8 @@
+#ifndef IZ_ENCODER_H
+#define IZ_ENCODER_H 1
+
 #include <cstring>
 
-#include "libiz.h"
 #include "iz_p.h"
 
 namespace IZ {
@@ -75,13 +77,6 @@ private:
     unsigned int dCount[1 << (2 * CONTEXT_BITS)];
 };
 
-unsigned char *encodeImage(const Image<> &im, unsigned char *dest)
-{
-    ImageEncoder<> ic;
-    ic.begin(dest);
-    ic.encodeImageSize(im);
-    ic.encodeImagePixels(im);
-    return ic.end();
-}
-
 } // namespace IZ
+
+#endif

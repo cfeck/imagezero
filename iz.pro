@@ -12,4 +12,5 @@ QMAKE_CXXFLAGS_RELEASE += "-O2 -mmmx -Winline -fomit-frame-pointer -fno-rtti -fn
 
 # Input
 HEADERS += intmacros.h portableimage.h bitcoder.h pixel.h libiz.h iz_p.h image.h file.h
-SOURCES += main.cpp encode.cpp decode.cpp portableimage.cpp table.cpp file.cpp
+HEADERS += decoder.h encoder.h
+SOURCES += main.cpp portableimage.cpp table.cpp file.cpp libiz.cpp
