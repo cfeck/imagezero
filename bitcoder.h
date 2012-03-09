@@ -119,6 +119,10 @@ public:
 #endif
     }
 
+    void align() {
+        len = 0;
+    }
+
     unsigned char *end() {
 #if defined(USE_MMX)
         _mm_empty();
