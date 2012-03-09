@@ -37,7 +37,7 @@ public:
         memcpy(dCount, staticdCount, sizeof(dCount));
     }
 
-    void decodeImagePixels(Image<> &im) {
+    void decodeImagePixels(Image<> &im) __attribute__((always_inline)) {
         unsigned char *p = (unsigned char *) im.data();
         const int bpr = bpp * im.width();
         im.setSamplesPerLine(bpr);

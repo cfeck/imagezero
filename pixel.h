@@ -32,7 +32,7 @@ public:
         p[C2] = c[2];
     }
 
-    void predict(const U *p, int bpp, int bpr, int (*predictor)(int, int, int)) {
+    void predict(const U *p, int bpp, int bpr, int (*predictor)(int, int, int))  __attribute__((always_inline)) {
         c[0] = predictor(p[C0 - bpp], p[C0 - bpr], p[C0 - bpp - bpr]);
         c[1] = predictor(p[C1 - bpp], p[C1 - bpr], p[C1 - bpp - bpr]);
         c[2] = predictor(p[C2 - bpp], p[C2 - bpr], p[C2 - bpp - bpr]);

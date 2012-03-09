@@ -1,70 +1,56 @@
-#include <unistd.h>
-#include <fcntl.h>
 #include <cstdio>
 #include <cstdlib>
-#include <cstddef>
 #include <cstring>
 
-#include <sys/stat.h>
-
 #include "libiz.h"
+#include "encoder.h"
+#include "decoder.h"
 #include "portableimage.h"
-
-using namespace IZ;
+#include "file.h"
 
 static void decodeIZ(const char *infilename, const char *outfilename)
 {
     PortableImage pi;
-    int infd = ::open(infilename, O_RDONLY);
-    if (infd < 0) {
+    InputFile infile(infilename);
+    if (!infile.isReadable()) {
         perror("Cannot open input file");
         exit(EXIT_FAILURE);
     }
-    int outfd = ::open(outfilename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (outfd < 0) {
+    OutputFile outfile(outfilename);
+    if (!outfile.isWritable()) {
         perror("Cannot open output file");
         exit(EXIT_FAILURE);
     }
-    struct stat sb;
-    fstat(infd, &sb);
-    int insize = sb.st_size;
-    unsigned char *src = new unsigned char[insize + 17];
-    int pos = 0;
-    int remaining = insize;
-    while (remaining > 0) {
-        int bytesRead = ::read(infd, src + pos, remaining);
-        if (bytesRead < 0)
-            break;
-        remaining -= bytesRead;
-        pos += bytesRead;
-    }
-    if (remaining > 0) {
-        perror("Cannot read input file");
+    IZ::initDecodeTable();
+    IZ::ImageDecoder<3> ic;
+    ic.begin(infile.data());
+    ic.decodeImageSize(pi);
+    pi.setComponents(3);
+    const unsigned int dataSize = pi.width() * pi.height() * pi.components();
+    unsigned char *dest = outfile.prepareData(dataSize + 33);
+    if (!dest) {
+        perror("Cannot write output file");
         exit(EXIT_FAILURE);
     }
-    initDecodeTable();
-    pi.setComponents(3);
-    decodeImage(pi, src);
-    pi.write(outfd);
-    ::close(infd);
-    ::close(outfd);
-    delete[] src;
+    pi.writeHeader(dest);
+    ic.decodeImagePixels(pi);
+    outfile.commitData(dest, pi.data() - dest + dataSize);
 }
 
 static void encodeIZ(const char *infilename, const char *outfilename)
 {
     PortableImage pi;
-    int infd = ::open(infilename, O_RDONLY);
-    if (infd < 0) {
+    InputFile infile(infilename);
+    if (!infile.isReadable()) {
         perror("Cannot open input file");
         exit(EXIT_FAILURE);
     }
-    int outfd = ::open(outfilename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (outfd < 0) {
+    OutputFile outfile(outfilename);
+    if (!outfile.isWritable()) {
         perror("Cannot open output file");
         exit(EXIT_FAILURE);
     }
-    if (!pi.read(infd)) {
+    if (!pi.readHeader(infile.data())) {
         fprintf(stderr, "Cannot handle input file, only 24 bit PPM files supported.\n");
         exit(EXIT_FAILURE);
     }
@@ -76,12 +62,24 @@ static void encodeIZ(const char *infilename, const char *outfilename)
         fprintf(stderr, "Cannot handle image size %d x %d, limit is 16384 x 16384.\n", pi.width(), pi.height());
         exit(EXIT_FAILURE);
     }
-    unsigned char *dest = new unsigned char[pi.height() * pi.width() * 4 + 33];
-    initEncodeTable();
-    ::write(outfd, dest, encodeImage(pi, dest) - dest);
-    ::close(infd);
-    ::close(outfd);
-    delete[] dest;
+    unsigned char *dest = outfile.prepareData(pi.height() * pi.width() * 4 + 33);
+    if (!dest) {
+        perror("Cannot write output file");
+        exit(EXIT_FAILURE);
+    }
+#if 0
+    IZ::initEncodeTable();
+    IZ::ImageEncoder<3> ic;
+    ic.begin(dest);
+    ic.encodeImageSize(pi);
+    ic.encodeImagePixels(pi);
+    unsigned char *destEnd = ic.end();
+    outfile.commitData(dest, destEnd - dest);
+#else
+    IZ::initEncodeTable();
+    unsigned char *destEnd = encodeImage(pi, dest);
+    outfile.commitData(dest, destEnd - dest);
+#endif
 }
 
 int main(int argc, char *argv[])

@@ -1,17 +1,4 @@
-#ifdef HAVE_CONFIG_H
-#include "iz_config.h"
-#endif
-
 #include "portableimage.h"
-
-#if defined(HAVE_MMAP)
-#include <sys/mman.h>
-#endif
-
-#include <sys/stat.h>
-#include <unistd.h>
-
-#include <cstdlib>
 
 static unsigned char *writeValue(unsigned char *p, unsigned char whiteSpace, int value)
 {
@@ -68,7 +55,10 @@ unsigned char *PortableImage::writeHeader(unsigned char *p)
     p = writeValue(p, ' ', m_height);
     p = writeValue(p, '\n', 255);
 
+    setSamplesPerLine(m_components * m_width);
+
     *p++ = '\n';
+    m_data = p;
     return p;
 }
 
@@ -104,67 +94,10 @@ bool PortableImage::readHeader(const unsigned char *p)
 
 PortableImage::PortableImage()
     : m_components(0)
-#if defined(HAVE_MMAP)
-    , m_buffer(MAP_FAILED)
-#else
-    , m_buffer(0)
-#endif
 {
 }
 
 PortableImage::~PortableImage()
 {
-#if defined(HAVE_MMAP)
-    if (m_buffer != MAP_FAILED)
-        munmap(m_buffer, m_bufferSize);
-#else
-    free(m_buffer);
-#endif
-}
-
-bool PortableImage::read(int fd)
-{
-#if defined(HAVE_MMAP)
-    struct stat sb;
-    fstat(fd, &sb);
-    m_bufferSize = sb.st_size;
-    m_buffer = mmap(0, m_bufferSize, PROT_READ/* | PROT_WRITE*/, MAP_PRIVATE, fd, 0);
-    if (m_buffer == MAP_FAILED || !readHeader((unsigned char *) m_buffer)) {
-        m_components = 0;
-        return false;
-    }
-    return true;
-#else
-    struct stat sb;
-    fstat(fd, &sb);
-    m_bufferSize = sb.st_size;
-    m_buffer = malloc(m_bufferSize);
-    int pos = 0;
-    int remaining = m_bufferSize;
-    while (remaining > 0) {
-        int bytesRead = ::read(fd, (char *) m_buffer + pos, remaining);
-        if (bytesRead < 0)
-            break;
-        remaining -= bytesRead;
-        pos += bytesRead;
-    }
-    if (remaining > 0 || !readHeader((unsigned char *) m_buffer)) {
-        m_components = 0;
-        return false;
-    }
-    return true;
-#endif
-}
-
-bool PortableImage::write(int fd)
-{
-    unsigned char buf[32];
-    int size = writeHeader(buf) - buf;
-    if (::write(fd, buf, size) != size)
-        return false;
-    size = m_components * m_width * m_height;
-    if (::write(fd, m_data, size) != size)
-        return false;
-    return true;
 }
 
