@@ -8,7 +8,7 @@ DEPENDPATH += .
 INCLUDEPATH += .
 CONFIG += release
 QT -= gui core
-QMAKE_CXXFLAGS_RELEASE += "-O2 -mmmx -Winline -fomit-frame-pointer -fno-rtti -fno-exceptions"
+QMAKE_CXXFLAGS_RELEASE += "-DHAVE_MMAP -O2 -mmmx -mtune=atom -Winline -fomit-frame-pointer -fno-rtti -fno-exceptions"
 
 # Input
 HEADERS += intmacros.h portableimage.h bitcoder.h pixel.h libiz.h iz_p.h image.h file.h
