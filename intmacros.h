@@ -22,14 +22,14 @@ static inline unsigned int signBit(int v)
 // return -1, if exactly one of v1 and v2 is negative, 0 otherwise
 static inline int oppositeSign(int v1, int v2)
 {
-//    return (v1 ^ v2) < 0 ? -1 : 0
+//    return (v1 ^ v2) < 0 ? -1 : 0;
     return (v1 ^ v2) >> SS;
 }
 
 // return v0 if s is 0, return v1 if s is -1, otherwise the behavior is undefined
 static inline int selectVal(int s, int v0, int v1)
 {
-//    return !s ? v1 : v2;
+//    return !s ? v0 : v1;
     return (~s & v0) | (s & v1);
 }
 
@@ -87,7 +87,7 @@ static inline unsigned int bsr(unsigned int w)
 static inline unsigned int numBits(unsigned int v)
 {
 //    return v > 0 ? 1 + log2(v) : 0;
-//    unsigned int k = 0; while (w > 0) { w >>= 1; ++k; } return k;
+//    unsigned int k = 0; while (v > 0) { v >>= 1; ++k; } return k;
     return cancelValue(1 + bsr(v), v);
 }
 
