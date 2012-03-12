@@ -26,7 +26,7 @@ namespace IZ {
 
 template <
     int bpp = 3,
-    typename Predictor = Predictor3med<>,
+    typename Predictor = Predictor3avgplane<>,
     typename Code = U32
 >
 class ImageEncoder : public BitEncoder<Code>

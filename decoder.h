@@ -11,13 +11,13 @@ namespace IZ {
 {                                               \
     Pixel<> pix, pp;                            \
                                                 \
-    pp.predict(p, bpp, bpr, predictor::predict); \
     this->fillCache();                          \
     int nl = decodeTable[pl][this->peekBits(MAX_CODE_LENGTH)]; \
     this->skipBits(dCount[(pl << CONTEXT_BITS) + nl]); \
     pl = nl;                                    \
     pix.readBits(*this, nl);                    \
                                                 \
+    pp.predict(p, bpp, bpr, predictor::predict); \
     pix.toSigned();                             \
     pix.reverseTransform();                     \
     pix += pp;                                  \
@@ -27,7 +27,7 @@ namespace IZ {
 
 template <
     int bpp = 3,
-    typename Predictor = Predictor3med<>,
+    typename Predictor = Predictor3avgplane<>,
     typename Code = U32
 >
 class ImageDecoder : public BitDecoder<Code>
