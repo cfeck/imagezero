@@ -45,7 +45,7 @@ class Predictor3avgplane
 {
 public:
     static int predict(int x, int y, int xy) {
-        return (3 * x + 3 * y - 2 * xy) >> 2;
+        return (3 * x + 3 * y - 2 * xy + 2) >> 2;
     }
 };
 
@@ -55,7 +55,7 @@ class Predictor2avg
 public:
     static int predict(int x, int y, int xy) {
         UNUSED(xy);
-        return (x + y) >> 1;
+        return (x + y + 1) >> 1;
     }
 };
 
