@@ -1,0 +1,6 @@
+You absolutely must compile this project with
+full optimization. If the predictors do not get
+inlined, they will cause an access violation.
+
+If unsure, inspect the generated assembly code.
+All functions in libiz.cpp must not do any calls.
