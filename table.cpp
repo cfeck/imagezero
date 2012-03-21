@@ -81,15 +81,15 @@ void initDecodeTable()
 {
     initBitsTable();
 #ifdef CHECKTABLE
-    for (int pl = 0; pl < CONTEXT_COUNT; ++pl) {
-        for (int v = 0; v < MAX_CODE_VALUE; ++v) {
+    for (unsigned int pl = 0; pl < CONTEXT_COUNT; ++pl) {
+        for (unsigned int v = 0; v < MAX_CODE_VALUE; ++v) {
             decodeTable[pl][v] = 100;
         }
     }
 #endif
-    for (int pl = 0; pl < CONTEXT_COUNT; ++pl) {
-        for (int v = 0; v < MAX_CODE_VALUE; ++v) {
-            for (int nl = 0; nl < CONTEXT_COUNT; ++nl) {
+    for (unsigned int pl = 0; pl < CONTEXT_COUNT; ++pl) {
+        for (unsigned int v = 0; v < MAX_CODE_VALUE; ++v) {
+            for (unsigned int nl = 0; nl < CONTEXT_COUNT; ++nl) {
                 int bits = staticdCount[(pl << CONTEXT_BITS) + nl];
                 if ((v >> (MAX_CODE_LENGTH - bits)) == staticdBits[(pl << CONTEXT_BITS) + nl]) {
 #ifdef CHECKTABLE
@@ -108,9 +108,9 @@ void initDecodeTable()
         }
     }
 #ifdef CHECKTABLE
-    for (int pl = 0; pl < CONTEXT_COUNT; ++pl) {
+    for (unsigned int pl = 0; pl < CONTEXT_COUNT; ++pl) {
         printf("%d: ", pl);
-        for (int v = 0; v < MAX_CODE_VALUE; ++v) {
+        for (unsigned int v = 0; v < MAX_CODE_VALUE; ++v) {
             if (decodeTable[pl][v] == 100) {
                 printf("ERROR missing value %d\n", v);
                 exit(1);
