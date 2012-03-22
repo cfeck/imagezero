@@ -41,7 +41,7 @@ char decodeTable[1 << CONTEXT_BITS][MAX_CODE_VALUE];
 
 static int comp_int(const void *p1, const void *p2)
 {
-  return *((int *) p1) - *((int *) p2);
+  return *((const int *) p1) - *((const int *) p2);
 }
 
 static void initBitsTable()

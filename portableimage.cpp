@@ -88,7 +88,7 @@ bool PortableImage::readHeader(const unsigned char *p)
     setSamplesPerLine(m_components * m_width);
 
     ++p; // skip single space
-    m_data = p;
+    m_data = (unsigned char *) p;
     return true;
 }
 

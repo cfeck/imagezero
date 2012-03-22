@@ -15,7 +15,7 @@ public:
     int width() const { return m_width; }
     int height() const { return m_height; }
     ptrdiff_t samplesPerLine() const { return m_spl; }
-    const Sample *data() const { return m_data; }
+    Sample *data() const { return m_data; }
 
     void setWidth(int width) { m_width = width; }
     void setHeight(int height) { m_height = height; }
@@ -26,7 +26,7 @@ protected:
     int m_width;
     int m_height;
     ptrdiff_t m_spl;
-    const Sample *m_data;
+    Sample *m_data;
 };
 
 } // namespace IZ
