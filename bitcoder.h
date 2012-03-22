@@ -72,7 +72,7 @@ public:
     }
 
     void begin(const unsigned char *ptr) {
-        p = (Code *) ptr;
+        p = (const Code *) ptr;
 #if defined(USE_MMX)
         bitcache = _mm_cvtsi32_si64(fetchCode());
 #else
@@ -123,15 +123,15 @@ public:
         len = 0;
     }
 
-    unsigned char *end() {
+    const unsigned char *end() {
 #if defined(USE_MMX)
         _mm_empty();
 #endif
-        return (unsigned char *) (p - 1);
+        return (const unsigned char *) (p - 1);
     }
 
 private:
-    Code *p;
+    const Code *p;
 };
 
 template<typename Code = U32>
