@@ -11,7 +11,7 @@ namespace IZ {
 #if defined(__LP64__) || defined(__L64__)
 typedef unsigned long U64;
 typedef unsigned int U32;
-#elif defined(__LLP64__) || defined(__LL64__)
+#elif defined(__LLP64__) || defined(__LL64__) || defined(_WIN64)
 typedef unsigned long long U64;
 typedef unsigned int U32;
 #elif defined(__MMX__)
