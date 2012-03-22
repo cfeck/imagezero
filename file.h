@@ -1,15 +1,17 @@
 #ifndef FILE_H
 #define FILE_H 1
 
+#include <cstddef>
+
 class InputFile
 {
 public:
-    InputFile(const char *filename);
+    explicit InputFile(const char *filename);
     ~InputFile();
 
     bool isReadable() const;
     const unsigned char *data() const;
-    int dataSize() const;
+    size_t dataSize() const;
 
 private:
     class Private;
@@ -19,12 +21,12 @@ private:
 class OutputFile
 {
 public:
-    OutputFile(const char *filename);
+    explicit OutputFile(const char *filename);
     ~OutputFile();
 
     bool isWritable() const;
-    unsigned char *prepareData(int maxSize);
-    void commitData(unsigned char *data, int size);
+    unsigned char *prepareData(size_t maxSize);
+    void commitData(unsigned char *data, size_t size);
 
 private:
     class Private;

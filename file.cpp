@@ -20,7 +20,7 @@ public:
     Private() : addr(MAP_FAILED) { }
 
     void *addr;
-    int size;
+    size_t size;
 };
 
 InputFile::InputFile(const char *filename)
@@ -60,7 +60,7 @@ const unsigned char *InputFile::data() const
     return (const unsigned char *) d->addr;
 }
 
-int InputFile::dataSize() const
+size_t InputFile::dataSize() const
 {
     return d->size;
 }
@@ -72,7 +72,7 @@ public:
     Private() { }
 
     int fd;
-    int mapSize;
+    size_t mapSize;
 };
 
 OutputFile::OutputFile(const char *filename)
@@ -97,7 +97,7 @@ bool OutputFile::isWritable() const
     return false;
 }
 
-unsigned char *OutputFile::prepareData(int maxSize)
+unsigned char *OutputFile::prepareData(size_t maxSize)
 {
     if (d->fd != -1) {
         ftruncate(d->fd, maxSize);
@@ -113,7 +113,7 @@ unsigned char *OutputFile::prepareData(int maxSize)
     return 0;
 }
 
-void OutputFile::commitData(unsigned char *data, int size)
+void OutputFile::commitData(unsigned char *data, size_t size)
 {
     if (data) {
         if (d->mapSize) {
@@ -139,7 +139,7 @@ public:
     Private() : buffer(0), size(0) { }
 
     unsigned char *buffer;
-    int size;
+    size_t size;
 };
 
 InputFile::InputFile(const char *filename)
@@ -179,7 +179,7 @@ const unsigned char *InputFile::data() const
     return d->buffer;
 }
 
-int InputFile::dataSize() const
+size_t InputFile::dataSize() const
 {
     return d->size;
 }
@@ -218,12 +218,12 @@ bool OutputFile::isWritable() const
     return false;
 }
 
-unsigned char *OutputFile::prepareData(int maxSize)
+unsigned char *OutputFile::prepareData(size_t maxSize)
 {
     return (unsigned char *) malloc(maxSize);
 }
 
-void OutputFile::commitData(unsigned char *data, int size)
+void OutputFile::commitData(unsigned char *data, size_t size)
 {
     if (data) {
         if (d->fp) {
