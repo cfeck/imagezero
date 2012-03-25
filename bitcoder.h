@@ -127,7 +127,7 @@ public:
 #if defined(USE_MMX)
         _mm_empty();
 #endif
-        return (const unsigned char *) (p - 1);
+        return (const unsigned char *) (p - (len >= CodeBits));
     }
 
 private:
