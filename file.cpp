@@ -83,7 +83,7 @@ OutputFile::OutputFile(const char *filename)
 
 OutputFile::~OutputFile()
 {
-    if (d->fd) {
+    if (d->fd != -1) {
         close(d->fd);
     }
     delete d;
