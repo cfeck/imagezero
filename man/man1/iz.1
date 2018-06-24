@@ -1,0 +1,37 @@
+.TH "ImageZero User Manual" 1 "0.2.4" "ImageZero documentation"
+
+.SH NAME
+iz
+.SH DESCRIPTION
+ImageZero is a high-performance lossless RGB color image compressor/decompressor.
+Compared to PNG, it compresses 24 bit PPM files about 20 times faster,
+and decompresses to PPM about 2 times faster, while the compression rate
+is nearly as good as PNG for natural photos.
+ImageZero is not suited for "flat" (computer generated) graphics or grayscale images.
+The code is "early work in progress", and neither the image format,
+nor the library API are fully outlined yet.
+.SH USAGE
+\fBiz\fP [c|d] INPUTFILE OUTPUTFILE
+.SH COMMANDS
+.TP
+\fBc\fP
+To compress a 24 bit binary PPM image to an IZ file
+.TP
+\fBd\fP
+To decompress an IZ file to a 24 bit binary PPM image
+.SH OPTIONS
+.TP
+\fB--help\fP
+show help
+.TP
+\fB--version\fP
+show version and author information
+.SH EXAMPLE
+.TP
+compress
+iz c input.ppm output.iz
+.TP
+decompress
+iz d input.iz output.ppm
+.SH SEE ALSO
+ppm (5)

@@ -1,0 +1,12 @@
+<package format="2">
+  <name>imagezero</name>
+  <version>0.2.4</version>
+  <description>
+    ImageZero is a fast lossless image compression algorithm for RGB color photos.
+  </description>
+  <url>https://github.com/zvezdochiot/imagezero</url>
+  <url>https://github.com/swri-robotics/imagezero_transport</url>
+  <url>https://github.com/cfeck/imagezero</url>
+  <maintainer email="zvezdochiot@users.sourceforge.net">zvezdochiot</maintainer>
+  <license>BSD</license>
+</package>
